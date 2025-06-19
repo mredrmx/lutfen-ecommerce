@@ -1,56 +1,121 @@
-# Lütfen E-Ticaret Uygulaması
+# Lütfen E-Ticaret
 
-Modern, karanlık temalı bir e-ticaret web uygulaması. Next.js, Prisma ORM, SQLite, DaisyUI ve Tailwind CSS ile geliştirilmiştir.
+Modern ve responsive e-ticaret sitesi. Next.js, Prisma, JWT authentication ve Tailwind CSS ile geliştirilmiştir.
 
-## Özellikler
-- **Kullanıcı Yönetimi:** Kayıt, giriş, profil görüntüleme/güncelleme, çıkış
-- **Rol Tabanlı Erişim:** Admin ve normal kullanıcı ayrımı, admin paneli
-- **Ürün Yönetimi:** Admin için ürün ekleme, düzenleme, silme
-- **Sipariş Yönetimi:** Kullanıcılar için alışveriş ve sipariş geçmişi, admin için sipariş durumu yönetimi
-- **Mesajlaşma:** Kullanıcılar arası metin mesajlaşma
-- **Modern Karanlık Tema:** DaisyUI + Tailwind CSS ile responsive ve şık arayüz
+## 🚀 Özellikler
 
-## Kurulum
-1. **Depoyu klonlayın:**
-   ```bash
-   git clone <proje-linki>
-   cd lutfen
-   ```
-2. **Bağımlılıkları yükleyin:**
-   ```bash
-   npm install
-   ```
-3. **Veritabanını başlatın:**
-   ```bash
-   npx prisma migrate dev --name init
-   ```
-4. **Geliştirme sunucusunu başlatın:**
-   ```bash
-   npm run dev
-   ```
-5. **Uygulamayı açın:**
-   [http://localhost:3000](http://localhost:3000)
+- **🔐 Kullanıcı Yönetimi**: Kayıt olma, giriş yapma, profil yönetimi
+- **🛍️ Ürün Yönetimi**: Ürün ekleme, düzenleme, silme, öne çıkarma
+- **📱 Responsive Tasarım**: Mobil ve desktop uyumlu
+- **💬 Mesajlaşma Sistemi**: Kullanıcılar arası mesajlaşma
+- **📦 Sipariş Yönetimi**: Sipariş oluşturma ve takip
+- **👨‍💼 Admin Paneli**: Ürün ve sipariş yönetimi
+- **🌙 Dark Mode**: Otomatik tema desteği
 
-## Varsayılan Admin Kullanıcısı
-İlk kullanıcılar normal kullanıcı olarak kaydolur. Admin yetkisi için veritabanında ilgili kullanıcının `role` alanını `admin` olarak güncelleyebilirsiniz.
+## 🛠️ Teknolojiler
 
-## Klasör Yapısı
-- `src/app/` : Sayfalar ve API route'ları
-- `src/components/` : Ortak bileşenler (Navbar vb.)
-- `prisma/` : Prisma şeması ve migration dosyaları
+- **Frontend**: Next.js 14, React, TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: SQLite (Prisma ORM)
+- **Authentication**: JWT
+- **Deployment**: Vercel (önerilen)
 
-## Kullanılan Teknolojiler
-- [Next.js](https://nextjs.org/)
-- [Prisma ORM](https://www.prisma.io/)
-- [SQLite](https://www.sqlite.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [DaisyUI](https://daisyui.com/)
-- [JWT](https://jwt.io/) ile kimlik doğrulama
+## 📦 Kurulum
 
-## Geliştirici Notları
-- Tüm API ve sayfa erişimleri güvenlik için JWT ve middleware ile korunmaktadır.
-- Responsive ve karanlık tema için DaisyUI + Tailwind kullanılmıştır.
-- Kod okunabilirliği ve sürdürülebilirlik için component yapısı ve yorumlar eklenmiştir.
+1. **Repository'yi klonla**
+```bash
+git clone https://github.com/kullaniciadi/lutfen-ecommerce.git
+cd lutfen-ecommerce
+```
 
-## Katkı ve Lisans
-Katkıda bulunmak için pull request gönderebilirsiniz. Lisans bilgisi için proje sahibine danışınız.
+2. **Bağımlılıkları yükle**
+```bash
+npm install
+```
+
+3. **Environment variables oluştur**
+```bash
+cp .env.example .env
+```
+
+4. **Database'i hazırla**
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+5. **Development server'ı başlat**
+```bash
+npm run dev
+```
+
+6. **Tarayıcıda aç**
+```
+http://localhost:3000
+```
+
+## 🔧 Environment Variables
+
+`.env` dosyasında şu değişkenleri tanımla:
+
+```env
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="ekinler_bas_vermeden_kor_buzagı_topallamazmıs"
+```
+
+## 📱 Kullanım
+
+### Kullanıcı İşlemleri
+- **Kayıt Ol**: `/register` sayfasından yeni hesap oluştur
+- **Giriş Yap**: `/login` sayfasından giriş yap
+- **Profil**: `/profile` sayfasından bilgilerini güncelle
+
+### Ürün İşlemleri
+- **Ürünleri Görüntüle**: Ana sayfa ve `/products` sayfası
+- **Ürün Yönetimi** (Admin): `/admin/products` sayfası
+
+### Mesajlaşma
+- **Mesaj Gönder**: `/messages` sayfasından diğer kullanıcılara mesaj gönder
+
+### Admin Paneli
+- **Ürün Yönetimi**: Ürün ekle, düzenle, sil, öne çıkar
+- **Sipariş Yönetimi**: Siparişleri görüntüle ve yönet
+
+## 🚀 Deployment
+
+### Vercel ile Deploy
+
+1. **Vercel'e bağlan**
+```bash
+npm install -g vercel
+vercel
+```
+
+2. **Environment variables'ları Vercel'de ayarla**
+3. **Database'i deploy et**
+
+### Diğer Platformlar
+
+- **Netlify**: Static export ile
+- **Railway**: Full-stack deployment
+- **Heroku**: Custom buildpack ile
+
+## 🤝 Katkıda Bulunma
+
+1. Fork yap
+2. Feature branch oluştur (`git checkout -b feature/amazing-feature`)
+3. Commit yap (`git commit -m 'Add amazing feature'`)
+4. Push yap (`git push origin feature/amazing-feature`)
+5. Pull Request aç
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.
+
+## 👨‍💻 Geliştirici
+
+**Emre** - Modern web teknolojileri ile e-ticaret çözümleri
+
+---
+
+⭐ Bu projeyi beğendiysen yıldız vermeyi unutma!
