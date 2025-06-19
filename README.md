@@ -96,7 +96,7 @@ Bu proje MIT lisansı altında lisanslanmıştır.
 
 ## 👨‍💻 Geliştirici
 
-**Emre**
+**Emre** -
 **Muhsin**
 
 ---
