@@ -24,7 +24,7 @@ Modern ve responsive e-ticaret sitesi. Next.js, Prisma, JWT authentication ve Ta
 
 1. **Repository'yi klonla**
 ```bash
-git clone https://github.com/kullaniciadi/lutfen-ecommerce.git
+git clone https://github.com/mredrmx/lutfen-ecommerce.git
 cd lutfen-ecommerce
 ```
 
@@ -81,24 +81,6 @@ JWT_SECRET="ekinler_bas_vermeden_kor_buzagı_topallamazmıs"
 - **Ürün Yönetimi**: Ürün ekle, düzenle, sil, öne çıkar
 - **Sipariş Yönetimi**: Siparişleri görüntüle ve yönet
 
-## 🚀 Deployment
-
-### Vercel ile Deploy
-
-1. **Vercel'e bağlan**
-```bash
-npm install -g vercel
-vercel
-```
-
-2. **Environment variables'ları Vercel'de ayarla**
-3. **Database'i deploy et**
-
-### Diğer Platformlar
-
-- **Netlify**: Static export ile
-- **Railway**: Full-stack deployment
-- **Heroku**: Custom buildpack ile
 
 ## 🤝 Katkıda Bulunma
 
@@ -114,7 +96,8 @@ Bu proje MIT lisansı altında lisanslanmıştır.
 
 ## 👨‍💻 Geliştirici
 
-**Emre** - Modern web teknolojileri ile e-ticaret çözümleri
+**Emre**
+""Muhsin""
 
 ---
 
