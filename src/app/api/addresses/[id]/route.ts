@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = process.env.JWT_SECRET || "ekinler_bas_vermeden_kor_buzagı_topallamazmıs";
 
 // Token'dan kullanıcı ID'sini güvenli bir şekilde alan helper fonksiyonu
-const getUserIdFromToken = (request: NextRequest): number | null => {
+async function getUserIdFromToken(request: NextRequest): Promise<number | null> {
+    // Önce Authorization header'ından token al
     const authHeader = request.headers.get("authorization");
-    const token = authHeader?.split(" ")[1];
+    let token = authHeader?.split(" ")[1];
+    
+    // Eğer Authorization header'ında yoksa cookie'den al
+    if (!token) {
+        const cookieStore = await cookies();
+        token = cookieStore.get('token')?.value;
+    }
+    
     if (!token) return null;
 
     try {
@@ -16,12 +25,13 @@ const getUserIdFromToken = (request: NextRequest): number | null => {
     } catch (error) {
         return null;
     }
-};
+}
 
 // Bir adresi güncelle
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-    const userId = getUserIdFromToken(request);
-    const addressId = Number(params.id);
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const userId = await getUserIdFromToken(request);
+    const { id } = await params;
+    const addressId = Number(id);
 
     if (!userId) {
         return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
@@ -52,9 +62,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // Bir adresi sil
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const userId = getUserIdFromToken(request);
-    const addressId = Number(params.id);
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const userId = await getUserIdFromToken(request);
+    const { id } = await params;
+    const addressId = Number(id);
 
     if (!userId) {
         return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });

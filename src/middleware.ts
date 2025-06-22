@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
-const adminRoutes = ["/admin", "/admin/products", "/admin/orders"];
-const adminApiRoutes = ["/api/admin", "/api/admin/products", "/api/admin/orders"];
+const JWT_SECRET = process.env.JWT_SECRET || "ekinler_bas_vermeden_kor_buzagı_topallamazmıs";
 
-export function middleware(req: NextRequest) {
+const adminRoutes = ["/admin", "/admin/products", "/admin/orders", "/admin/users"];
+const adminApiRoutes = ["/api/admin", "/api/admin/products", "/api/admin/orders", "/api/admin/users"];
+
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isApiRoute = pathname.startsWith("/api/");
   
@@ -23,7 +26,7 @@ export function middleware(req: NextRequest) {
       }
     }
     
-    // Sadece token varlığını kontrol et, doğrulama client-side yapılacak
+    // Token yoksa erişimi reddet
     if (!token) {
       if (isApiRoute) {
         return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
@@ -33,7 +36,27 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
     
-    // Token varsa devam et, doğrulama client-side yapılacak
+    // JWT doğrulaması yap
+    try {
+      const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
+      const userRole = (payload as any).role;
+      
+      // Admin rolü kontrolü
+      if (!userRole || userRole.toLowerCase() !== "admin") {
+        if (isApiRoute) {
+          return NextResponse.json({ error: "Admin yetkisi gerekli." }, { status: 403 });
+        }
+        const url = new URL("/", req.url);
+        return NextResponse.redirect(url);
+      }
+    } catch (error) {
+      if (isApiRoute) {
+        return NextResponse.json({ error: "Geçersiz token." }, { status: 401 });
+      }
+      const url = new URL("/login", req.url);
+      url.searchParams.set("returnUrl", pathname);
+      return NextResponse.redirect(url);
+    }
   }
 
   return NextResponse.next();

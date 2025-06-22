@@ -33,6 +33,11 @@ model Product {
   price       Float
   stock       Int
   imageUrl    String
+  brand       String   // Marka (Nike, Adidas, vb.)
+  category    String   // Kategori (Spor, Günlük, Resmi, vb.)
+  colors      String   // Renkler (JSON string olarak saklanacak)
+  sizes       String   // Boyutlar (JSON string olarak saklanacak)
+  images      String   // Ürün fotoğrafları (JSON string olarak saklanacak)
   featured    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -47,6 +52,8 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   items     OrderItem[]
+  addressId Int
+  address   Address  @relation(fields: [addressId], references: [id])
 }
 
 model OrderItem {
@@ -57,6 +64,8 @@ model OrderItem {
   productId Int
   quantity  Int
   price     Float
+  color     String?  // Seçilen renk
+  size      String?  // Seçilen boyut
 }
 
 model Message {
@@ -86,4 +95,5 @@ model Address {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[]
 }

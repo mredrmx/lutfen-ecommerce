@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || "ekinler_bas_vermeden_kor_buzagı_topallamazmıs";
 
-function getUserId(req: NextRequest) {
+async function getUserId(req: NextRequest) {
+  // Önce Authorization header'ından token al
   const auth = req.headers.get("authorization");
-  if (!auth) return null;
-  let token = auth;
-  if (token.startsWith("Bearer ")) token = token.replace("Bearer ", "");
+  let token: string | null = auth;
+  if (token && token.startsWith("Bearer ")) token = token.replace("Bearer ", "");
+  
+  // Eğer Authorization header'ında yoksa cookie'den al
+  if (!token) {
+    const cookieStore = await cookies();
+    token = cookieStore.get('token')?.value || null;
+  }
+  
+  if (!token) return null;
+  
   try {
     const user = jwt.verify(token, JWT_SECRET) as { id: number };
     return user.id;
@@ -19,7 +29,7 @@ function getUserId(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const userId = getUserId(req);
+  const userId = await getUserId(req);
   if (!userId) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
   const users = await prisma.user.findMany({
     where: { id: { not: userId } },

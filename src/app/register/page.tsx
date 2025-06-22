@@ -11,8 +11,7 @@ export default function RegisterPage() {
     surname: "",
     email: "", 
     password: "", 
-    confirmPassword: "",
-    address: ""
+    confirmPassword: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -44,7 +43,6 @@ export default function RegisterPage() {
           surname: form.surname,
           email: form.email,
           password: form.password,
-          address: form.address,
         }),
       });
 
@@ -126,22 +124,6 @@ export default function RegisterPage() {
               className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
               placeholder="ornek@email.com"
               value={form.email}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Adres
-            </label>
-            <textarea
-              id="address"
-              name="address"
-              required
-              rows={3}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
-              placeholder="Teslimat için açık adresinizi girin"
-              value={form.address}
               onChange={handleChange}
             />
           </div>

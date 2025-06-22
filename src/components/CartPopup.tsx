@@ -1,6 +1,9 @@
 "use client";
+import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 // Gerekli ikonlar
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -13,11 +16,62 @@ const MinusIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>
 );
 
+interface Address {
+  id: number;
+  title: string;
+  recipientName: string;
+  // ... diğer adres alanları
+}
+
 export default function CartPopup() {
   const { isCartOpen, toggleCart, cartItems, addToCart, removeFromCart, getCartTotal } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
+  const [addresses, setAddresses] = useState<Address[]>([]);
+
   const FREE_SHIPPING_THRESHOLD = 1000;
   const total = getCartTotal();
   const remainingForFreeShipping = FREE_SHIPPING_THRESHOLD - total;
+
+  useEffect(() => {
+    if (user) {
+      const fetchAddresses = async () => {
+        try {
+          const res = await fetch("/api/addresses", {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem("token")}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setAddresses(data);
+          }
+        } catch (error) {
+          console.error("Adresler alınamadı:", error);
+        }
+      };
+      fetchAddresses();
+    }
+  }, [user]);
+
+  const handleCheckout = () => {
+    if (!user) {
+      toast.error("Sipariş vermek için giriş yapmalısınız.");
+      router.push("/login");
+      return;
+    }
+    if (cartItems.length === 0) {
+      toast.error("Sepetiniz boş.");
+      return;
+    }
+    if (addresses.length === 0) {
+      toast.error("Sipariş vermek için kayıtlı bir adresiniz olmalı.");
+      router.push('/addresses');
+      return;
+    }
+    // Sepet ve adres seçimiyle /checkout sayfasına yönlendir
+    router.push("/checkout");
+  };
 
   return (
     <>
@@ -30,7 +84,7 @@ export default function CartPopup() {
       />
       {/* Sepet paneli */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl z-50 transform transition-transform ${
+        className={`fixed top-0 right-0 h-full w-full md:max-w-md bg-white dark:bg-gray-800 shadow-2xl z-50 transform transition-transform ${
           isCartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -64,25 +118,44 @@ export default function CartPopup() {
                 {cartItems.length === 0 ? (
                     <div className="text-center mt-20">
                         <p className="text-gray-500 mb-4">Sepetinizde ürün bulunmamaktadır.</p>
-                        <button onClick={toggleCart} className="px-6 py-3 bg-red-700 text-white rounded-md hover:bg-red-800 transition-colors">
+                        <button onClick={toggleCart} className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                             Alışverişe Devam Et
                         </button>
                     </div>
                 ) : (
                     <ul className="space-y-4">
-                        {cartItems.map(item => (
-                            <li key={item.id} className="flex gap-4">
+                        {cartItems.map((item, index) => (
+                            <li key={`${item.id}-${item.size}-${item.color}-${index}`} className="flex gap-4">
                                 <img src={item.imageUrl} alt={item.name} className="w-20 h-20 object-cover rounded-md" />
                                 <div className="flex-1">
                                     <h3 className="font-semibold">{item.name}</h3>
-                                    <p className="text-gray-500 text-sm">₺{item.price.toFixed(2)}</p>
+                                    {item.brand && (
+                                        <p className="text-blue-600 text-sm font-medium">{item.brand}</p>
+                                    )}
+                                    <p className="text-gray-500 text-sm">₺{(Number(item.price) || 0).toFixed(2)}</p>
+                                    {(item.size || item.color) && (
+                                        <div className="text-xs text-gray-600 mt-1">
+                                            {item.size && <span className="mr-2">Boyut: {item.size}</span>}
+                                            {item.color && <span>Renk: {item.color}</span>}
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-2 mt-2">
-                                        <button onClick={() => removeFromCart(item.id)} className="p-1 border rounded-full"><MinusIcon className="w-4 h-4" /></button>
-                                        <span>{item.quantity}</span>
-                                        <button onClick={() => addToCart(item)} className="p-1 border rounded-full"><PlusIcon className="w-4 h-4" /></button>
+                                        <button 
+                                            onClick={() => removeFromCart(item.id, item.color, item.size)} 
+                                            className="p-1 border rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        >
+                                            <MinusIcon className="w-4 h-4" />
+                                        </button>
+                                        <span>{Number(item.quantity) || 0}</span>
+                                        <button 
+                                            onClick={() => addToCart(item, 1, item.color, item.size)} 
+                                            className="p-1 border rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        >
+                                            <PlusIcon className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </div>
-                                <p className="font-semibold">₺{(item.price * item.quantity).toFixed(2)}</p>
+                                <p className="font-semibold">₺{((Number(item.price) || 0) * (Number(item.quantity) || 0)).toFixed(2)}</p>
                             </li>
                         ))}
                     </ul>
@@ -94,9 +167,13 @@ export default function CartPopup() {
                 <footer className="p-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center mb-4">
                         <span className="text-lg font-semibold">Toplam</span>
-                        <span className="text-xl font-bold">₺{total.toFixed(2)}</span>
+                        <span className="text-xl font-bold">₺{(Number(total) || 0).toFixed(2)}</span>
                     </div>
-                    <button className="w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors">
+                    <button 
+                        onClick={handleCheckout} 
+                        disabled={cartItems.length === 0}
+                        className="w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         Siparişi Tamamla
                     </button>
                 </footer>

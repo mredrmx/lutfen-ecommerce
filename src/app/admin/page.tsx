@@ -28,7 +28,7 @@ export default function AdminPage() {
       
       try {
         const decoded = jwt.decode(token) as UserInfo;
-        if (!decoded || decoded.role !== "admin") {
+        if (!decoded || decoded.role.toLowerCase() !== "admin") {
           router.push("/");
           return;
         }
@@ -74,7 +74,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!user || user.role !== "admin") {
+  if (!user || user.role.toLowerCase() !== "admin") {
     return null;
   }
 
@@ -107,7 +107,7 @@ export default function AdminPage() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Ürün Yönetimi Kartı */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 md:p-8 hover:shadow-xl transition-shadow">
             <h2 className="text-xl md:text-2xl font-bold text-blue-700 dark:text-blue-300 mb-3 md:mb-4">Ürün Yönetimi</h2>
@@ -135,6 +135,21 @@ export default function AdminPage() {
               className="inline-block w-full text-center py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors text-sm md:text-base"
             >
               Siparişleri Yönet
+            </Link>
+          </div>
+
+          {/* Kullanıcı Yönetimi Kartı */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 md:p-8 hover:shadow-xl transition-shadow">
+            <h2 className="text-xl md:text-2xl font-bold text-blue-700 dark:text-blue-300 mb-3 md:mb-4">Kullanıcı Yönetimi</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base mb-4 md:mb-6">
+              Sistemdeki kullanıcıları görüntüleyin ve yönetin. 
+              Hesap silme isteklerini yerine getirin ve kullanıcı istatistiklerini inceleyin.
+            </p>
+            <Link 
+              href="/admin/users" 
+              className="inline-block w-full text-center py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors text-sm md:text-base"
+            >
+              Kullanıcıları Yönet
             </Link>
           </div>
         </div>

@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import AddressPanel from "@/components/AddressPanel"; // Bu bileşeni bir sonraki adımda oluşturacağız
+import AddressPanel from "@/components/AddressPanel";
+import AccountLayout from "@/components/AccountLayout";
 
 // Tiplerimizi tanımlayalım
 export type Address = {
@@ -79,28 +80,36 @@ export default function AddressesPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 md:p-8">
-        <div className="max-w-4xl mx-auto">
-          <header className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Adreslerim</h1>
-          </header>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <AccountLayout>
+        <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Adreslerim</h1>
             <button
               onClick={handleAddNew}
-              className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center p-6 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md"
             >
-              <PlusIcon className="w-6 h-6 mr-2 text-gray-500" />
-              <span className="font-semibold text-gray-700 dark:text-gray-200">Yeni adres</span>
+              <PlusIcon className="w-5 h-5" />
+              <span>Yeni Adres Ekle</span>
             </button>
+        </div>
+        
+        {loading && <p>Yükleniyor...</p>}
+        
+        {!loading && addresses.length === 0 && (
+          <div className="text-center py-16 border-2 border-dashed rounded-lg">
+            <p className="text-gray-500">Kayıtlı adresiniz bulunmamaktadır.</p>
+          </div>
+        )}
 
+        {!loading && addresses.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {addresses.map((address) => (
-              <div key={address.id} className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg p-4 flex justify-between items-start">
-                <div className="flex items-start">
-                  <HomeIcon className="w-6 h-6 mr-4 mt-1 text-gray-600 dark:text-gray-400" />
+              <div key={address.id} className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 rounded-lg p-5 flex justify-between items-start">
+                <div className="flex items-start gap-4">
+                  <HomeIcon className="w-8 h-8 mt-1 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                   <div>
                     <h2 className="font-bold text-lg text-gray-900 dark:text-white">{address.title}</h2>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">{address.recipientName} {address.recipientSurname}</p>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">{address.fullAddress}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">{address.recipientName} {address.recipientSurname}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">{address.fullAddress}</p>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">{address.neighborhood}, {address.district}, {address.city}</p>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">{address.phone}</p>
                   </div>
@@ -111,8 +120,8 @@ export default function AddressesPage() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
+        )}
+      </AccountLayout>
       <AddressPanel
         isOpen={isPanelOpen}
         onCloseAction={handlePanelCloseAction}

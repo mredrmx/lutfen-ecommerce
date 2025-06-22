@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, name: user.name, surname: user.surname, role: user.role },
       process.env.JWT_SECRET || "ekinler_bas_vermeden_kor_buzagı_topallamazmıs",
       { expiresIn: "24h" }
     );

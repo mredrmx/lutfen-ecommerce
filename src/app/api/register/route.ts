@@ -5,9 +5,9 @@ import { prisma } from "../../../lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, surname, email, password, address } = body;
+    const { name, surname, email, password } = body;
 
-    if (!name || !surname || !email || !password || !address) {
+    if (!name || !surname || !email || !password) {
       return NextResponse.json(
         { error: "Tüm alanlar gerekli" },
         { status: 400 }
@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
         surname,
         email: email.toLowerCase(),
         password: hashedPassword,
-        address,
         role: "user", // Varsayılan rol
       },
     });

@@ -7,18 +7,25 @@ type Product = {
   name: string;
   price: number;
   imageUrl: string;
+  brand?: string;
+  category?: string;
+  selectedSize?: string;
+  selectedColor?: string;
 };
 
-type CartItem = Product & {
+export interface CartItem extends Product {
   quantity: number;
-};
+  color?: string;
+  size?: string;
+}
 
 // Context'in state ve fonksiyon tipleri
 interface ICartContext {
   cartItems: CartItem[];
   isCartOpen: boolean;
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: number) => void;
+  addToCart: (product: Product, quantity: number, color?: string, size?: string) => void;
+  removeFromCart: (productId: number, color?: string, size?: string) => void;
+  clearCart: () => void;
   toggleCart: () => void;
   getCartTotal: () => number;
   getItemCount: () => number;
@@ -51,36 +58,66 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleCart = () => setIsCartOpen(!isCartOpen);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, quantity: number, color?: string, size?: string) => {
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
+      const existingItem = prevItems.find(item => 
+        item.id === product.id && 
+        item.color === color && 
+        item.size === size
+      );
+      
       if (existingItem) {
         // Ürün zaten sepetteyse, miktarını artır
         return prevItems.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id && 
+          item.color === color && 
+          item.size === size
+            ? { ...item, quantity: item.quantity + quantity } 
+            : item
         );
       }
       // Ürün sepette değilse, yeni bir item olarak ekle
-      return [...prevItems, { ...product, quantity: 1 }];
+      return [...prevItems, { ...product, quantity, color, size }];
     });
   };
 
-  const removeFromCart = (productId: number) => {
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const removeFromCart = (productId: number, color?: string, size?: string) => {
     setCartItems(prevItems => {
-        const existingItem = prevItems.find(item => item.id === productId);
-        if (existingItem?.quantity === 1) {
-            // Miktar 1 ise, ürünü sepetten tamamen çıkar
-            return prevItems.filter(item => item.id !== productId);
-        }
-        // Miktar 1'den fazlaysa, miktarını azalt
-        return prevItems.map(item =>
-            item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
+      const existingItem = prevItems.find(item => 
+        item.id === productId && 
+        item.color === color && 
+        item.size === size
+      );
+      
+      if (existingItem?.quantity === 1) {
+        // Miktar 1 ise, ürünü sepetten tamamen çıkar
+        return prevItems.filter(item => 
+          !(item.id === productId && 
+            item.color === color && 
+            item.size === size)
         );
+      }
+      // Miktar 1'den fazlaysa, miktarını azalt
+      return prevItems.map(item =>
+        item.id === productId && 
+        item.color === color && 
+        item.size === size
+          ? { ...item, quantity: item.quantity - 1 } 
+          : item
+      );
     });
   };
   
   const getCartTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cartItems.reduce((total, item) => {
+      const price = Number(item.price) || 0;
+      const quantity = Number(item.quantity) || 0;
+      return total + (price * quantity);
+    }, 0);
   };
 
   const getItemCount = () => {
@@ -88,7 +125,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, isCartOpen, toggleCart, addToCart, removeFromCart, getCartTotal, getItemCount }}>
+    <CartContext.Provider value={{ cartItems, isCartOpen, toggleCart, addToCart, removeFromCart, getCartTotal, getItemCount, clearCart }}>
       {children}
     </CartContext.Provider>
   );

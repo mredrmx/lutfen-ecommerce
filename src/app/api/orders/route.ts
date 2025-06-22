@@ -1,71 +1,96 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "ekinler_bas_vermeden_kor_buzagı_topallamazmıs";
 
-function getUserId(req: NextRequest) {
-  const auth = req.headers.get("authorization");
-  if (!auth) return null;
-  let token = auth;
-  if (token.startsWith("Bearer ")) token = token.replace("Bearer ", "");
-  try {
-    const user = jwt.verify(token, JWT_SECRET) as { id: number };
-    return user.id;
-  } catch {
-    return null;
-  }
-}
+async function getUserIdFromSession(): Promise<number | null> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    if (!token) return null;
 
-export async function POST(req: NextRequest) {
-  const userId = getUserId(req);
-  if (!userId) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
-  const { items } = await req.json();
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    return NextResponse.json({ error: "Sepet boş." }, { status: 400 });
-  }
-  // Stok kontrolü
-  for (const item of items) {
-    const product = await prisma.product.findUnique({ where: { id: item.productId } });
-    if (!product || product.stock < item.quantity) {
-      return NextResponse.json({ error: `Yetersiz stok: ${product?.name || "Ürün"}` }, { status: 400 });
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+        return decoded.id;
+    } catch (error) {
+        return null;
     }
-  }
-  // Sipariş ve OrderItem oluştur
-  const order = await prisma.order.create({
-    data: {
-      userId,
-      status: "Beklemede",
-      items: {
-        create: items.map((item: any) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      },
-    },
-    include: { items: true },
-  });
-  // Stokları güncelle
-  for (const item of items) {
-    await prisma.product.update({
-      where: { id: item.productId },
-      data: { stock: { decrement: item.quantity } },
-    });
-  }
-  return NextResponse.json({ order });
 }
 
 export async function GET(req: NextRequest) {
-  const userId = getUserId(req);
-  if (!userId) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
-  const orders = await prisma.order.findMany({
-    where: { userId },
-    include: {
-      items: { include: { product: { select: { name: true } } } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json({ orders });
+    const userId = await getUserIdFromSession();
+    if (!userId) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
+    const orders = await prisma.order.findMany({
+        where: { userId },
+        include: { 
+            items: true,
+            address: true
+        },
+        orderBy: { createdAt: 'desc' },
+    });
+    return NextResponse.json(orders);
+}
+
+export async function POST(req: NextRequest) {
+  const userId = await getUserIdFromSession();
+  if (!userId) {
+    return NextResponse.json({ error: "Yetkisiz işlem" }, { status: 401 });
+  }
+
+  const body = await req.json();
+  const { items, addressId } = body;
+
+  if (!items || items.length === 0) {
+    return NextResponse.json(
+      { error: "Sepet boş olamaz" },
+      { status: 400 }
+    );
+  }
+
+  if (!addressId) {
+    return NextResponse.json(
+      { error: "Adres seçimi zorunludur" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const address = await prisma.address.findUnique({
+      where: { id: addressId, userId: userId },
+    });
+
+    if (!address) {
+      return NextResponse.json(
+        { error: "Geçersiz adres" },
+        { status: 404 }
+      );
+    }
+
+    const order = await prisma.order.create({
+      data: {
+        userId: userId,
+        addressId: addressId,
+        items: {
+          create: items.map((item: any) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size,
+            color: item.color,
+          })),
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+    return NextResponse.json(order, { status: 201 });
+  } catch (error) {
+    console.error("Sipariş oluşturma hatası:", error);
+    return NextResponse.json(
+      { error: "Sipariş oluşturulamadı" },
+      { status: 500 }
+    );
+  }
 } 

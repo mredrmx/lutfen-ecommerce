@@ -2,24 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "ekinler_bas_vermeden_kor_buzagı_topallamazmıs";
 
-function isAdmin(req: NextRequest) {
-  const auth = req.headers.get("authorization") || req.cookies.get("token")?.value;
-  if (!auth) return false;
-  let token = auth;
-  if (token.startsWith("Bearer ")) token = token.replace("Bearer ", "");
+async function isAdmin(req: NextRequest) {
+  // Önce Authorization header'ından token al
+  const auth = req.headers.get("authorization");
+  let token: string | null = auth;
+  if (token && token.startsWith("Bearer ")) token = token.replace("Bearer ", "");
+  
+  // Eğer Authorization header'ında yoksa cookie'den al
+  if (!token) {
+    const cookieStore = await cookies();
+    token = cookieStore.get("token")?.value || null;
+  }
+  
+  if (!token) return false;
+  
   try {
     const user = jwt.verify(token, JWT_SECRET) as { role: string };
-    return user.role === "admin";
+    return user.role.toLowerCase() === "admin";
   } catch {
     return false;
   }
 }
 
 export async function GET(req: NextRequest) {
-  if (!isAdmin(req)) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
+  if (!(await isAdmin(req))) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
   try {
     const orders = await prisma.order.findMany({
       include: {
@@ -28,7 +38,6 @@ export async function GET(req: NextRequest) {
             name: true,
             surname: true,
             email: true,
-            address: true,
           },
         },
         items: {
@@ -55,7 +64,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  if (!isAdmin(req)) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
+  if (!(await isAdmin(req))) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
   try {
     const { searchParams } = new URL(req.url);
     const id = Number(searchParams.get("id"));
@@ -77,7 +86,6 @@ export async function PUT(req: NextRequest) {
             name: true,
             surname: true,
             email: true,
-            address: true,
           },
         },
         items: {
