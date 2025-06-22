@@ -49,7 +49,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="backdrop-blur bg-white/80 dark:bg-gray-900/80 shadow-lg rounded-b-2xl mb-6 md:mb-10 transition-all">
+    <nav className="backdrop-blur bg-white/80 dark:bg-gray-900/80 shadow-lg transition-all">
       <div className="container mx-auto flex justify-between items-center py-3 px-4">
         <Link href="/" className="font-bold text-xl md:text-2xl text-blue-700 dark:text-blue-300 tracking-tight hover:opacity-80 transition">Lütfen E-Ticaret</Link>
         
@@ -57,7 +57,6 @@ export default function Navbar() {
         <div className="hidden md:flex gap-2">
           <Link href="/products" className="rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 transition">Ürünler</Link>
           {user && <Link href="/orders" className="rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 transition">Siparişlerim</Link>}
-          {user && <Link href="/messages" className="rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 transition">Mesajlar</Link>}
           {user && <Link href="/profile" className="rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 transition">Profil</Link>}
           {user?.role === "admin" && <Link href="/admin" className="rounded-lg px-3 py-1.5 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950 transition">Admin</Link>}
           {!user && <Link href="/login" className="rounded-lg px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 transition">Giriş</Link>}
@@ -98,15 +97,6 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Siparişlerim
-              </Link>
-            )}
-            {user && (
-              <Link 
-                href="/messages" 
-                className="block rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 transition"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Mesajlar
               </Link>
             )}
             {user && (

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
+import ChatPopup from "@/components/ChatPopup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Lütfen E-Ticaret",
-  description: "En yeni teknolojik ürünler burada!",
+  description: "Lütfen E-Ticaret'e hoş geldiniz!",
 };
 
 export const viewport: Viewport = {
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+        <ChatPopup />
       </body>
     </html>
   );
