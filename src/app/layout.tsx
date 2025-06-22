@@ -4,6 +4,9 @@ import "./globals.css";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import ChatPopup from "@/components/ChatPopup";
+import { CartProvider } from "@/context/CartContext";
+import CartPopup from "@/components/CartPopup";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,9 +40,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
-        <ChatPopup />
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
+            <CartPopup />
+            {children}
+            <ChatPopup />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

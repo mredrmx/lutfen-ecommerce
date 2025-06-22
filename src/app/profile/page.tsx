@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 export default function ProfilePage() {
-  const [form, setForm] = useState({ name: "", surname: "", email: "" });
+  const [form, setForm] = useState({ name: "", surname: "", email: "", address: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -16,12 +16,17 @@ export default function ProfilePage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.user) {
-          setForm({ name: data.user.name, surname: data.user.surname, email: data.user.email });
+          setForm({ 
+            name: data.user.name, 
+            surname: data.user.surname, 
+            email: data.user.email,
+            address: data.user.address || "" 
+          });
         }
       });
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -66,7 +71,8 @@ export default function ProfilePage() {
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input name="name" type="text" placeholder="Ad" className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" value={form.name} onChange={handleChange} />
           <input name="surname" type="text" placeholder="Soyad" className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" value={form.surname} onChange={handleChange} />
-          <input name="email" type="email" placeholder="E-posta" className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" value={form.email} onChange={handleChange} />
+          <input name="email" type="email" placeholder="E-posta" className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" value={form.email} onChange={handleChange} disabled />
+          <textarea name="address" placeholder="Adres" rows={3} className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" value={form.address} onChange={handleChange} />
           <button type="submit" className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-md" disabled={loading}>{loading ? "Güncelleniyor..." : "Güncelle"}</button>
         </form>
         {error && <div className="w-full py-2 px-4 rounded-lg bg-red-100 text-red-700 text-center mt-2">{error}</div>}

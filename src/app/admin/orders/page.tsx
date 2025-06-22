@@ -21,6 +21,7 @@ type Order = {
     name: string;
     surname: string;
     email: string;
+    address: string;
   };
   items: OrderItem[];
 };
@@ -118,6 +119,7 @@ export default function AdminOrdersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       <div>{order.user.name} {order.user.surname}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">{order.user.email}</div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs truncate" title={order.user.address}>{order.user.address}</div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       <ul>

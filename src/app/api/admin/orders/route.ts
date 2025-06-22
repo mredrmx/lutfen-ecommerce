@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
             name: true,
             surname: true,
             email: true,
+            address: true,
           },
         },
         items: {
@@ -76,6 +77,7 @@ export async function PUT(req: NextRequest) {
             name: true,
             surname: true,
             email: true,
+            address: true,
           },
         },
         items: {

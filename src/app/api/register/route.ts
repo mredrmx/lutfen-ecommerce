@@ -4,9 +4,10 @@ import { prisma } from "../../../lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json();
+    const body = await request.json();
+    const { name, surname, email, password, address } = body;
 
-    if (!name || !email || !password) {
+    if (!name || !surname || !email || !password || !address) {
       return NextResponse.json(
         { error: "Tüm alanlar gerekli" },
         { status: 400 }
@@ -48,8 +49,10 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         name,
+        surname,
         email: email.toLowerCase(),
         password: hashedPassword,
+        address,
         role: "user", // Varsayılan rol
       },
     });
@@ -64,9 +67,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Register error:", error);
+    console.error("Kayıt hatası:", error);
     return NextResponse.json(
-      { error: "Sunucu hatası" },
+      { error: "Sunucu hatası. Lütfen daha sonra tekrar deneyin." },
       { status: 500 }
     );
   }

@@ -8,9 +8,11 @@ export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({ 
     name: "", 
+    surname: "",
     email: "", 
     password: "", 
-    confirmPassword: "" 
+    confirmPassword: "",
+    address: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -39,8 +41,10 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
+          surname: form.surname,
           email: form.email,
           password: form.password,
+          address: form.address,
         }),
       });
 
@@ -60,7 +64,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -77,20 +81,37 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Ad Soyad
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
-              placeholder="Ad Soyad"
-              value={form.name}
-              onChange={handleChange}
-            />
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="w-full">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Ad
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
+                placeholder="Adınız"
+                value={form.name}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="w-full">
+              <label htmlFor="surname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Soyad
+              </label>
+              <input
+                type="text"
+                id="surname"
+                name="surname"
+                required
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
+                placeholder="Soyadınız"
+                value={form.surname}
+                onChange={handleChange}
+              />
+            </div>
           </div>
 
           <div>
@@ -105,6 +126,22 @@ export default function RegisterPage() {
               className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
               placeholder="ornek@email.com"
               value={form.email}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Adres
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              required
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
+              placeholder="Teslimat için açık adresinizi girin"
+              value={form.address}
               onChange={handleChange}
             />
           </div>

@@ -16,12 +16,14 @@ model User {
   surname   String
   email     String   @unique
   password  String
+  // address   String? // Bu alan kaldırılıyor veya yorum satırı yapılıyor. Yeni Address modeli kullanılacak.
   role      String   @default("user") // 'admin' veya 'user'
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
   messagesSent     Message[] @relation("MessagesSent")
   messagesReceived Message[] @relation("MessagesReceived")
+  addresses Address[] // Kullanıcının birden çok adresi olabileceğini belirtir
 }
 
 model Product {
@@ -65,4 +67,23 @@ model Message {
   receiverId Int
   content   String
   createdAt DateTime @default(now())
+}
+
+// Yeni Adres Modeli
+model Address {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String   // Örn: "Ev", "İş Yeri"
+  recipientName String
+  recipientSurname String
+  phone         String
+  city          String
+  district      String
+  neighborhood  String
+  fullAddress   String   // Kapı no, sokak vb. detaylar
+  isDefault     Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

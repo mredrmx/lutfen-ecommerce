@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext'; // Auth context'i import et
 
 // Bu simgeleri daha sonra ekleyeceğiz
 const MessageSquareIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -29,28 +30,20 @@ type CurrentUser = { id: number; email: string; role: string } | null;
 
 
 export default function ChatPopup() {
+  const { user } = useAuth(); // Kullanıcı bilgisini context'ten al
   const [isOpen, setIsOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [content, setContent] = useState('');
-  const [currentUser, setCurrentUser] = useState<CurrentUser>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
+    // Sadece token'ı al
     const t = localStorage.getItem('token');
-    if (t) {
-      setToken(t);
-      try {
-        const payload = JSON.parse(atob(t.split('.')[1]));
-        setCurrentUser({ id: payload.id, email: payload.email, role: payload.role });
-      } catch (e) {
-        console.error("Token decode error:", e);
-        localStorage.removeItem('token');
-      }
-    }
-  }, []);
+    setToken(t);
+  }, [user]); // user değiştiğinde token'ı tekrar al
 
   const fetchUsers = async () => {
     if (!token) return;
@@ -78,7 +71,7 @@ export default function ChatPopup() {
       const data = await res.json();
       // Gelen mesajları ilgili kullanıcıya göre filtrele
       const filteredMessages = data.messages.filter(
-        (m: Message) => (m.senderId === currentUser?.id && m.receiverId === userId) || (m.senderId === userId && m.receiverId === currentUser?.id)
+        (m: Message) => (m.senderId === user?.id && m.receiverId === userId) || (m.senderId === userId && m.receiverId === user?.id)
       );
       setMessages(filteredMessages || []);
     } catch (err) {
@@ -118,12 +111,12 @@ export default function ChatPopup() {
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && user) { // Sadece kullanıcı varsa ve pencere açıksa çalıştır
       fetchUsers();
     }
-  }, [isOpen]);
+  }, [isOpen, user]);
 
-  if (!currentUser) return null;
+  if (!user) return null; // Kullanıcı yoksa bileşeni render etme
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -164,8 +157,8 @@ export default function ChatPopup() {
               // Mesajlaşma Ekranı
               <div className="flex flex-col space-y-2">
                  {messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.senderId === currentUser.id ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs px-3 py-2 rounded-lg ${msg.senderId === currentUser.id ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'}`}>
+                    <div key={msg.id} className={`flex ${msg.senderId === user.id ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-xs px-3 py-2 rounded-lg ${msg.senderId === user.id ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100'}`}>
                            {msg.content}
                         </div>
                     </div>

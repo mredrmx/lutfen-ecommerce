@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 type Product = {
   id: number;
@@ -16,6 +17,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -130,7 +132,10 @@ export default function Home() {
                       Stok: {product.stock}
                     </span>
                   </div>
-                  <button className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-md text-sm md:text-base">
+                  <button 
+                    onClick={() => addToCart(product)}
+                    className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-md text-sm md:text-base"
+                  >
                     Sepete Ekle
                   </button>
                 </div>
@@ -181,7 +186,10 @@ export default function Home() {
                       Stok: {product.stock}
                     </span>
                   </div>
-                  <button className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-md text-sm md:text-base">
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors shadow-md text-sm md:text-base"
+                  >
                     Sepete Ekle
                   </button>
                 </div>

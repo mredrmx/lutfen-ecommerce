@@ -1,49 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const JWT_SECRET = process.env.JWT_SECRET || "ekinler_bas_vermeden_kor_buzagı_topallamazmıs";
+const JWT_SECRET = process.env.JWT_SECRET!;
 
-function getUserFromToken(req: NextRequest) {
-  const auth = req.headers.get("authorization");
-  if (!auth) return null;
-  const token = auth.replace("Bearer ", "");
+export async function GET(request: NextRequest) {
+    try {
+        const token = request.headers.get("authorization")?.split(" ")[1];
+        if (!token) {
+          return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
+        }
+    
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    
+        if (!user) {
+          return NextResponse.json({ error: "Kullanıcı bulunamadı" }, { status: 404 });
+        }
+        
+        // Şifreyi yanıttan çıkar
+        const { password, ...userWithoutPassword } = user;
+    
+        return NextResponse.json({ user: userWithoutPassword });
+      } catch (error) {
+        return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
+      }
+}
+
+export async function PUT(request: NextRequest) {
   try {
-    return jwt.verify(token, JWT_SECRET) as { id: number; email: string; role: string };
-  } catch {
-    return null;
-  }
-}
+    const token = request.headers.get("authorization")?.split(" ")[1];
+    if (!token) {
+      return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
+    }
 
-export async function GET(req: NextRequest) {
-  const userData = getUserFromToken(req);
-  if (!userData) {
-    return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
-  }
-  const user = await prisma.user.findUnique({
-    where: { id: userData.id },
-    select: { id: true, name: true, surname: true, email: true, role: true },
-  });
-  if (!user) {
-    return NextResponse.json({ error: "Kullanıcı bulunamadı." }, { status: 404 });
-  }
-  return NextResponse.json({ user });
-}
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+    const body = await request.json();
+    const { name, surname } = body;
 
-export async function PUT(req: NextRequest) {
-  const userData = getUserFromToken(req);
-  if (!userData) {
-    return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
+    const updatedUser = await prisma.user.update({
+      where: { id: decoded.id },
+      data: { name, surname },
+    });
+
+    const { password, ...userWithoutPassword } = updatedUser;
+
+    return NextResponse.json({ user: userWithoutPassword });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Profil güncellenemedi" },
+      { status: 500 }
+    );
   }
-  const { name, surname, email } = await req.json();
-  if (!name || !surname || !email) {
-    return NextResponse.json({ error: "Tüm alanlar zorunludur." }, { status: 400 });
-  }
-  const user = await prisma.user.update({
-    where: { id: userData.id },
-    data: { name, surname, email },
-    select: { id: true, name: true, surname: true, email: true, role: true },
-  });
-  return NextResponse.json({ user });
 } 
